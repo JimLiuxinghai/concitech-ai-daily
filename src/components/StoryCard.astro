@@ -1,0 +1,34 @@
+---
+import { CATEGORIES } from '../data/site';
+import { dateKey, editionPath, formatDate, type DailyEntry, type Language } from '../lib/content';
+
+const { entry, language, featured = false } = Astro.props as {
+  entry: DailyEntry;
+  language: Language;
+  featured?: boolean;
+};
+const primary = entry.data.categories[0];
+---
+
+<a class:list={['story-card', { featured }]} href={editionPath(language, entry.data.datePT)}>
+  <div class="category-chip"><span>{CATEGORIES[primary].index}</span> {CATEGORIES[primary][language]}</div>
+  <div>
+    <h3>{entry.data.title}</h3>
+    <p>{entry.data.description}</p>
+  </div>
+  <footer class="mono">
+    <time datetime={dateKey(entry.data.datePT)}>{formatDate(entry.data.datePT, language, 'short')}</time>
+    <span>{entry.data.itemCount} {language === 'zh' ? '条信号' : 'signals'} ↗</span>
+  </footer>
+</a>
+
+<style>
+  .featured { grid-column: span 8; }
+  :global(.story-card:not(.featured)) { grid-column: span 4; }
+  @media (max-width: 960px) {
+    .featured, :global(.story-card:not(.featured)) { grid-column: span 6; }
+  }
+  @media (max-width: 800px) {
+    .featured, :global(.story-card:not(.featured)) { grid-column: auto; }
+  }
+</style>

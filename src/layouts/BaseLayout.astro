@@ -1,0 +1,64 @@
+---
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE } from '../data/site';
+import type { Language } from '../lib/content';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  language: Language;
+  canonicalPath: string;
+  alternatePath: string;
+  image?: string;
+  article?: boolean;
+}
+
+const {
+  title,
+  description,
+  language,
+  canonicalPath,
+  alternatePath,
+  image = '/social-default.svg',
+  article = false,
+} = Astro.props;
+const canonical = new URL(canonicalPath, SITE.origin);
+const alternate = new URL(alternatePath, SITE.origin);
+const imageUrl = new URL(image, SITE.origin);
+const analyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
+const fullTitle = title.includes('Concitech AI') ? title : `${title} · ${language === 'zh' ? SITE.zhName : SITE.enName}`;
+---
+
+<!doctype html>
+<html lang={language === 'zh' ? 'zh-CN' : 'en'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f4f0e7" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={language === 'zh' ? 'en' : 'zh-CN'} href={alternate} />
+    <link rel="alternate" hreflang="x-default" href={language === 'zh' ? canonical : alternate} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={language === 'zh' ? SITE.zhName : SITE.enName} href={language === 'zh' ? '/rss.xml' : '/en/rss.xml'} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:locale" content={language === 'zh' ? 'zh_CN' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.publisherId}`} crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{language === 'zh' ? '跳到正文' : 'Skip to content'}</a>
+    <SiteHeader {language} {alternatePath} />
+    <main id="main"><slot /></main>
+    <SiteFooter {language} />
+    {analyticsToken && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>}
+  </body>
+</html>

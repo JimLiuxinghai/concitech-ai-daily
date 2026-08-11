@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Language } from '../lib/content';
+
+const { language, page } = Astro.props as { language: Language; page: 'about' | 'editorial' | 'privacy' | 'contact' };
+const isZh = language === 'zh';
+const copy = {
+  zh: {
+    about: { title: '关于我们', deck: 'Concitech AI 日报是一份中英双语的每日 AI 新闻编辑摘要。', body: ['我们面向希望跟上人工智能变化、但不想被信息流淹没的科技读者。每一期从公开来源中筛选值得关注的变化，保留原始链接，并明确区分事实、各方说法和编辑判断。', '日报以太平洋时间归属日期，每天北京时间 13:00 左右发布。中文为默认版本，英文版由同一份编辑内容翻译生成。'] },
+    editorial: { title: '编辑准则', deck: '少一点噪声，多一点上下文；出处清楚，不假装确定。', body: ['我们优先收录对产品、研究、开发、商业或政策产生实际影响的消息。单纯的情绪表达、无法追溯的传闻和重复信息不会进入日报。', '自动化工具帮助我们聚合、整理和翻译内容。发布前会检查日期、双语配对、链接、结构和敏感标记。涉及不确定信息时，正文会明确说明可信度与仍待确认之处。', '原始来源始终优先于二手转述。任何赞助或商业关系都会清楚标记，不影响编辑排序。'] },
+    privacy: { title: '隐私政策', deck: '我们只收集运行站点和理解整体访问情况所需的最少数据。', body: ['本站使用 Cloudflare 提供托管和隐私友好的网站访问统计，并使用 Google AdSense 展示广告。广告服务可能依据适用法律使用 Cookie、设备标识符或类似技术。', '对于需要征得同意的地区，广告同意管理由 Google 的隐私与消息功能接入。你可以通过浏览器设置限制 Cookie。本站当前不提供账户、评论或邮件订阅，因此不会主动收集这些个人资料。', '如需访问、更正或删除与本站有关的个人数据，请通过联系页面发送请求。'] },
+    contact: { title: '联系与纠错', deck: '发现事实错误、坏链接或翻译偏差，请直接告诉我们。', body: ['发送邮件至 hello@concitech.org。请附上日报日期、相关段落和可核查的来源；我们会在核实后更正正文，并在影响理解时保留更正说明。', '商业合作、转载申请和一般建议也可以使用同一邮箱。'] },
+  },
+  en: {
+    about: { title: 'About', deck: 'Concitech AI Daily is a bilingual editorial briefing on the day’s meaningful AI news.', body: ['We serve technology readers who need to keep up with AI without living inside the feed. Each edition selects consequential changes from public sources, preserves the original links, and separates verifiable facts, stakeholder claims and editorial judgment.', 'Editions are filed by Pacific Time and normally publish around 13:00 China Standard Time. Chinese is the default edition; English is translated from the same editorial source.'] },
+    editorial: { title: 'Editorial standards', deck: 'Less noise, more context. Clear sourcing, honest uncertainty.', body: ['We prioritize developments with material effects on products, research, development, business or policy. Repeated chatter, untraceable rumors and context-free reactions do not make the edition.', 'Automation assists aggregation, organization and translation. Before publication, rules check dates, bilingual parity, links, structure and uncertainty markers. Original sources take priority over second-hand summaries.', 'Commercial relationships never determine editorial order. Sponsorship, if introduced, will be labeled clearly.'] },
+    privacy: { title: 'Privacy', deck: 'We collect only what is needed to operate the site and understand aggregate readership.', body: ['Cloudflare hosts this site and provides privacy-focused aggregate analytics. Google AdSense displays advertising and may use cookies, device identifiers or similar technologies where permitted by applicable law.', 'In regions where consent is required, advertising consent is handled through Google Privacy & Messaging. You can also limit cookies through your browser. The site currently has no accounts, comments or newsletter and does not actively collect those personal details.', 'To request access, correction or deletion of personal data related to this site, use the contact page.'] },
+    contact: { title: 'Contact & corrections', deck: 'Found a factual error, broken link or translation issue? Tell us directly.', body: ['Email hello@concitech.org with the edition date, relevant passage and a verifiable source. We will correct the text after review and retain a correction note when the change materially affects understanding.', 'Use the same address for partnerships, republication requests and general feedback.'] },
+  },
+}[language][page];
+const canonicalPath = `${isZh ? '' : '/en'}/${page}/`;
+const alternatePath = `${isZh ? '/en' : ''}/${page}/`;
+---
+
+<BaseLayout title={copy.title} description={copy.deck} {language} {canonicalPath} {alternatePath}>
+  <header class="page-header shell"><div><p class="eyebrow">Concitech AI Editorial</p><h1>{copy.title}</h1></div><p class="deck">{copy.deck}</p></header>
+  <article class="prose info-body">{copy.body.map((paragraph) => <p>{paragraph}</p>)}</article>
+</BaseLayout>
+
+<style>.info-body { padding-top: 70px; font-size: clamp(1.2rem, 2vw, 1.55rem); }</style>

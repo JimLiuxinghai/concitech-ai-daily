@@ -1,0 +1,38 @@
+---
+import type { Language } from '../lib/content';
+
+interface Props {
+  language: Language;
+  alternatePath: string;
+}
+
+const { language, alternatePath } = Astro.props;
+const isZh = language === 'zh';
+---
+
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="masthead" href={isZh ? '/' : '/en/'} aria-label={isZh ? 'Concitech AI 日报首页' : 'Concitech AI Daily home'}>
+      <span class="mark">C<span>AI</span></span>
+      <span class="name">{isZh ? 'Concitech AI 日报' : 'Concitech AI Daily'}</span>
+    </a>
+    <nav aria-label={isZh ? '主导航' : 'Main navigation'}>
+      <a href={isZh ? '/archive/' : '/en/archive/'}>{isZh ? '归档' : 'Archive'}</a>
+      <a href={isZh ? '/about/' : '/en/about/'}>{isZh ? '关于' : 'About'}</a>
+      <a class="language" href={alternatePath} hreflang={isZh ? 'en' : 'zh-CN'}>{isZh ? 'EN' : '中文'}</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header { position: relative; z-index: 20; border-bottom: 1px solid var(--ink); background: color-mix(in srgb, var(--paper) 92%, transparent); }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; min-height: 74px; }
+  .masthead { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+  .mark { display: grid; place-items: center; width: 44px; height: 44px; color: white; background: var(--ink); font-family: 'Newsreader', serif; font-weight: 800; letter-spacing: -.1em; }
+  .mark span { color: #6f94ff; }
+  .name { font-family: 'Newsreader', 'Noto Sans SC', serif; font-size: 1.28rem; font-weight: 700; letter-spacing: -.025em; }
+  nav { display: flex; align-items: center; gap: clamp(15px, 3vw, 32px); font-family: 'IBM Plex Mono', monospace; font-size: .74rem; text-transform: uppercase; }
+  nav a { text-decoration: none; }
+  .language { padding: 7px 10px; border: 1px solid var(--ink); }
+  @media (max-width: 560px) { .name { display: none; } nav { gap: 12px; } }
+</style>

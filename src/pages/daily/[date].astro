@@ -1,0 +1,11 @@
+---
+import DailyPage from '../../components/DailyPage.astro';
+import { dateKey, getDaily } from '../../lib/content';
+
+export async function getStaticPaths() {
+  return (await getDaily('zh')).map((entry) => ({ params: { date: dateKey(entry.data.datePT) }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+---
+<DailyPage {entry} language="zh" />

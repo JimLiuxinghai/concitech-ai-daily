@@ -1,0 +1,33 @@
+---
+import type { Language } from '../lib/content';
+const { language } = Astro.props as { language: Language };
+const isZh = language === 'zh';
+const prefix = isZh ? '' : '/en';
+---
+
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <div>
+      <div class="footer-mark">C<span>AI</span></div>
+      <p>{isZh ? '每日一份克制、可追溯的 AI 新闻编辑摘要。' : 'A restrained, traceable editorial digest of AI news—daily.'}</p>
+    </div>
+    <nav aria-label={isZh ? '页脚导航' : 'Footer navigation'}>
+      <a href={`${prefix}/editorial/`}>{isZh ? '编辑准则' : 'Editorial'}</a>
+      <a href={`${prefix}/privacy/`}>{isZh ? '隐私政策' : 'Privacy'}</a>
+      <a href={`${prefix}/contact/`}>{isZh ? '联系与纠错' : 'Contact & corrections'}</a>
+      <a href={isZh ? '/rss.xml' : '/en/rss.xml'}>RSS</a>
+    </nav>
+    <p class="copyright mono">© {new Date().getFullYear()} Concitech AI Editorial</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer { margin-top: 110px; border-top: 7px solid var(--ink); padding: 40px 0 24px; background: var(--paper-bright); }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 48px; }
+  .footer-mark { font-family: 'Newsreader', serif; font-size: 3rem; font-weight: 800; letter-spacing: -.08em; }
+  .footer-mark span { color: var(--cobalt); }
+  .footer-grid p { max-width: 440px; color: var(--muted); }
+  nav { display: grid; align-content: start; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: .78rem; }
+  .copyright { grid-column: 1 / -1; margin-top: 30px; border-top: 1px solid var(--line); padding-top: 13px; }
+  @media (max-width: 680px) { .footer-grid { grid-template-columns: 1fr; } .copyright { grid-column: auto; } }
+</style>

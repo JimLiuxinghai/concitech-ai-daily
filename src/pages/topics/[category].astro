@@ -1,0 +1,7 @@
+---
+import TopicPage from '../../components/TopicPage.astro';
+import { CATEGORY_IDS } from '../../data/site';
+export function getStaticPaths() { return CATEGORY_IDS.map((category) => ({ params: { category }, props: { category } })); }
+const { category } = Astro.props;
+---
+<TopicPage language="zh" {category} />

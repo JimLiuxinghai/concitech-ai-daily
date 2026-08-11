@@ -1,0 +1,25 @@
+---
+import StoryCard from './StoryCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { CATEGORIES, type CategoryId } from '../data/site';
+import { getByCategory, type Language } from '../lib/content';
+
+const { language, category } = Astro.props as { language: Language; category: CategoryId };
+const isZh = language === 'zh';
+const entries = await getByCategory(language, category);
+const label = CATEGORIES[category][language];
+const canonicalPath = `${isZh ? '' : '/en'}/topics/${category}/`;
+const alternatePath = `${isZh ? '/en' : ''}/topics/${category}/`;
+---
+
+<BaseLayout title={label} description={isZh ? `Concitech AI 日报中与${label}有关的每日编辑摘要。` : `Daily Concitech AI editorial briefings related to ${label}.`} {language} {canonicalPath} {alternatePath}>
+  <header class="page-header shell">
+    <div><p class="eyebrow">Desk {CATEGORIES[category].index}</p><h1>{label}</h1></div>
+    <p class="deck">{isZh ? `共 ${entries.length} 期日报涉及这个主题。` : `${entries.length} editions touch this desk.`}</p>
+  </header>
+  <section class="shell topic-results">
+    <div class="edition-grid">{entries.map((entry, index) => <StoryCard {entry} {language} featured={index === 0} />)}</div>
+  </section>
+</BaseLayout>
+
+<style>.topic-results { padding-top: 58px; }</style>

@@ -1,0 +1,32 @@
+{
+  "name": "concitech-ai-daily",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run validate && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "validate": "node scripts/validate-content.mjs",
+    "covers": "node scripts/generate-covers.mjs",
+    "import": "node scripts/import-daily.mjs",
+    "backfill:english": "node scripts/backfill-english.mjs",
+    "publish:daily": "node scripts/publish-daily.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "astro": "^7.2.0",
+    "gray-matter": "^4.0.3",
+    "sharp": "^0.35.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
