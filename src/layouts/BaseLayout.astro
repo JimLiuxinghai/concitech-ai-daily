@@ -13,6 +13,7 @@ interface Props {
   alternatePath: string;
   image?: string;
   article?: boolean;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
@@ -23,12 +24,14 @@ const {
   alternatePath,
   image = '/social-default.svg',
   article = false,
+  structuredData,
 } = Astro.props;
 const canonical = new URL(canonicalPath, SITE.origin);
 const alternate = new URL(alternatePath, SITE.origin);
 const imageUrl = new URL(image, SITE.origin);
 const analyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 const fullTitle = title.includes('Concitech AI') ? title : `${title} · ${language === 'zh' ? SITE.zhName : SITE.enName}`;
+const structuredDataJson = structuredData ? JSON.stringify(structuredData).replaceAll('<', '\\u003c') : undefined;
 ---
 
 <!doctype html>
@@ -52,6 +55,7 @@ const fullTitle = title.includes('Concitech AI') ? title : `${title} · ${langua
     <meta property="og:image" content={imageUrl} />
     <meta property="og:locale" content={language === 'zh' ? 'zh_CN' : 'en_US'} />
     <meta name="twitter:card" content="summary_large_image" />
+    {structuredDataJson && <script is:inline type="application/ld+json" set:html={structuredDataJson}></script>}
     <script is:inline async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.publisherId}`} crossorigin="anonymous"></script>
   </head>
   <body>

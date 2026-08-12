@@ -4,13 +4,12 @@ import type { CategoryId } from '../data/site';
 export type DailyEntry = CollectionEntry<'daily'>;
 export type Language = 'zh' | 'en';
 
-export function dateKey(value: Date): string {
-  return value.toISOString().slice(0, 10);
+export function dateKey(value: string): string {
+  return value;
 }
 
-export function editionPath(language: Language, date: Date | string): string {
-  const key = typeof date === 'string' ? date : dateKey(date);
-  return language === 'zh' ? `/daily/${key}/` : `/en/daily/${key}/`;
+export function editionPath(language: Language, date: string): string {
+  return language === 'zh' ? `/daily/${date}/` : `/en/daily/${date}/`;
 }
 
 export function localizedPath(language: Language, path: string): string {
@@ -18,14 +17,14 @@ export function localizedPath(language: Language, path: string): string {
   return path === '/' ? '/en/' : `/en${path}`;
 }
 
-export function formatDate(value: Date, language: Language, style: 'long' | 'short' = 'long'): string {
+export function formatDate(value: string, language: Language, style: 'long' | 'short' = 'long'): string {
   return new Intl.DateTimeFormat(language === 'zh' ? 'zh-CN' : 'en-US', {
-    timeZone: 'America/Los_Angeles',
+    timeZone: 'UTC',
     year: 'numeric',
     month: style === 'long' ? 'long' : '2-digit',
     day: '2-digit',
     weekday: style === 'long' ? 'long' : undefined,
-  }).format(value);
+  }).format(new Date(`${value}T12:00:00Z`));
 }
 
 export function formatCST(value: Date, language: Language): string {
@@ -42,7 +41,7 @@ export function formatCST(value: Date, language: Language): string {
 
 export async function getDaily(language?: Language): Promise<DailyEntry[]> {
   const entries = await getCollection('daily', ({ data }) => !data.draft && (!language || data.language === language));
-  return entries.sort((a, b) => b.data.datePT.getTime() - a.data.datePT.getTime());
+  return entries.sort((a, b) => b.data.datePT.localeCompare(a.data.datePT));
 }
 
 export async function getEdition(language: Language, date: string): Promise<DailyEntry | undefined> {

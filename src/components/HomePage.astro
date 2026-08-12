@@ -1,7 +1,7 @@
 ---
 import StoryCard from './StoryCard.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { CATEGORIES, CATEGORY_IDS } from '../data/site';
+import { CATEGORIES, CATEGORY_IDS, SITE } from '../data/site';
 import { dateKey, editionPath, formatDate, getDaily, type Language } from '../lib/content';
 
 const { language } = Astro.props as { language: Language };
@@ -15,9 +15,35 @@ const title = isZh ? 'Concitech AI 日报｜每日 AI 新闻编辑摘要' : 'Con
 const description = isZh
   ? '面向科技读者的中英双语 AI 日报：每天筛选模型、产品、研究、开发工具、商业、政策与安全领域的重要变化。'
   : 'A bilingual daily editorial digest covering the most meaningful changes in AI models, products, research, tools, business, policy and security.';
+const organizationId = `${SITE.origin}/#organization`;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE.origin}/#website`,
+      url: SITE.origin,
+      name: isZh ? SITE.zhName : SITE.enName,
+      alternateName: isZh ? SITE.enName : SITE.zhName,
+      inLanguage: isZh ? 'zh-CN' : 'en',
+      publisher: { '@id': organizationId },
+    },
+    {
+      '@type': 'Organization',
+      '@id': organizationId,
+      name: 'Concitech AI',
+      url: SITE.origin,
+      email: SITE.email,
+      logo: {
+        '@type': 'ImageObject',
+        url: new URL('/favicon.svg', SITE.origin).href,
+      },
+    },
+  ],
+};
 ---
 
-<BaseLayout {title} {description} {language} canonicalPath={isZh ? '/' : '/en/'} {alternatePath}>
+<BaseLayout {title} {description} {language} canonicalPath={isZh ? '/' : '/en/'} {alternatePath} {structuredData}>
   {latest ? (
     <>
       <section class="lead shell">

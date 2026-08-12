@@ -8,6 +8,7 @@
     "build": "npm run validate && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test:semantics": "node scripts/semantic-regression-test.mjs",
     "test:smoke": "node scripts/smoke-test.mjs",
     "validate": "node scripts/validate-content.mjs",
     "covers": "node scripts/generate-covers.mjs",

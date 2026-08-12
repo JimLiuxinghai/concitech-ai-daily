@@ -3,15 +3,24 @@ import { resolve } from 'node:path';
 import matter from 'gray-matter';
 
 const root = resolve(import.meta.dirname, '..');
-const contentDir = resolve(root, 'src/content/daily');
+const contentDirArg = process.argv.find((arg) => arg.startsWith('--content-dir='));
+const contentDir = resolve(contentDirArg?.split('=')[1] ?? resolve(root, 'src/content/daily'));
 const validCategories = new Set(['models', 'products', 'research', 'devtools', 'business', 'policy', 'security']);
 const filenamePattern = /^(\d{4}-\d{2}-\d{2})\.(zh|en)\.md$/;
+const calendarDatePattern = /^\d{4}-\d{2}-\d{2}$/;
 const forbiddenHtml = /<(script|iframe|object|embed|form|style)\b/i;
 const errors = [];
 const editions = new Map();
 
 function fail(file, message) {
   errors.push(`${file}: ${message}`);
+}
+
+function isCalendarDate(value) {
+  if (typeof value !== 'string' || !calendarDatePattern.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
 }
 
 const files = readdirSync(contentDir).filter((name) => name.endsWith('.md')).sort();
@@ -24,18 +33,21 @@ for (const file of files) {
 
   const [, filenameDate, filenameLanguage] = match;
   const { data, content } = matter(readFileSync(resolve(contentDir, file), 'utf8'));
-  const datePT = data.datePT instanceof Date ? data.datePT.toISOString().slice(0, 10) : String(data.datePT ?? '');
+  const datePT = typeof data.datePT === 'string' ? data.datePT : '';
   const required = ['title', 'description', 'datePT', 'publishedAtCST', 'language', 'author', 'categories', 'cover', 'sourceFile', 'itemCount'];
   for (const field of required) if (data[field] === undefined || data[field] === '') fail(file, `missing frontmatter field "${field}"`);
 
+  if (!isCalendarDate(data.datePT)) fail(file, 'datePT must remain a quoted YYYY-MM-DD calendar value');
   if (datePT !== filenameDate) fail(file, `datePT ${datePT || '(empty)'} does not match filename date ${filenameDate}`);
   if (data.language !== filenameLanguage) fail(file, `language ${data.language ?? '(empty)'} does not match filename language ${filenameLanguage}`);
   if (typeof data.title !== 'string' || data.title.trim().length < 8) fail(file, 'title must contain at least 8 characters');
   if (typeof data.description !== 'string' || data.description.trim().length < 30 || data.description.length > 220) fail(file, 'description must be 30–220 characters');
   if (!Array.isArray(data.categories) || data.categories.length === 0 || data.categories.some((item) => !validCategories.has(item))) fail(file, 'categories must contain only approved category IDs');
+  if (Array.isArray(data.categories) && new Set(data.categories).size !== data.categories.length) fail(file, 'categories must not contain duplicates');
   if (!Number.isInteger(data.itemCount) || data.itemCount < 1) fail(file, 'itemCount must be a positive integer');
   if (Number.isNaN(new Date(data.publishedAtCST).getTime())) fail(file, 'publishedAtCST must be a valid ISO date');
   if (content.trim().length < 700) fail(file, 'body is too short for a daily edition (minimum 700 characters)');
+  if (/^#\s+/m.test(content)) fail(file, 'body must not repeat the frontmatter title as a level-one heading');
   if (forbiddenHtml.test(content) || /\]\(\s*javascript:/i.test(content)) fail(file, 'body contains unsafe HTML or a javascript: URL');
 
   const externalLinks = [...content.matchAll(/https?:\/\/[^\s)>]+/g)].map((item) => item[0]);
@@ -46,13 +58,21 @@ for (const file of files) {
     else if (!existsSync(resolve(root, 'public', data.cover.slice(1)))) fail(file, `cover not found at public${data.cover}`);
   }
 
-  const pair = editions.get(filenameDate) ?? new Set();
-  pair.add(filenameLanguage);
+  const pair = editions.get(filenameDate) ?? new Map();
+  pair.set(filenameLanguage, { file, categories: data.categories });
   editions.set(filenameDate, pair);
 }
 
 for (const [date, languages] of editions) {
-  if (!languages.has('zh') || !languages.has('en')) fail(date, 'edition is incomplete; both zh and en files are required');
+  if (!languages.has('zh') || !languages.has('en')) {
+    fail(date, 'edition is incomplete; both zh and en files are required');
+    continue;
+  }
+  const zhCategories = languages.get('zh').categories;
+  const enCategories = languages.get('en').categories;
+  if (Array.isArray(zhCategories) && Array.isArray(enCategories) && JSON.stringify(zhCategories) !== JSON.stringify(enCategories)) {
+    fail(date, `bilingual categories must match exactly (${languages.get('zh').file} != ${languages.get('en').file})`);
+  }
 }
 
 if (errors.length > 0) {

@@ -13,6 +13,7 @@ Production verification:
 
 ```bash
 npm run check
+npm run test:semantics
 npm run build
 npm run test:smoke
 ```
@@ -48,10 +49,10 @@ Google AdSense Auto Ads uses publisher `ca-pub-5950061234063954`. The root `ads.
 
 ## Daily schedule
 
-The Codex automation runs locally at 13:00 CST with retries at 14:00 and 15:00. It executes:
+Hermes runs the model-free `ai-list-site-publish` Cron under the `ai-list` profile at 13:00, 14:00, and 15:00 CST (`0 13-15 * * *`). The Cron invokes the deterministic site-publish script with `--no-agent`; that script executes:
 
 ```bash
 npm run publish:daily
 ```
 
-A publish is allowed only after `daily.md` and `daily.en.md` exist for the same PT date. GitHub push triggers the Cloudflare Pages deployment.
+A publish is allowed only after non-empty `daily.md` and `daily.en.md` exist for the same PT date. The hourly window supplies two retries without calling a language model. GitHub push triggers the Cloudflare Pages deployment.
