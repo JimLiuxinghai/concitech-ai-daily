@@ -5,6 +5,29 @@ const isZh = language === 'zh';
 const prefix = isZh ? '' : '/en';
 ---
 
+<section class="wechat-promo shell" aria-labelledby="wechat-follow-title">
+  <div class="wechat-promo__desktop">
+    <img
+      src="/wechat-smart-concise.webp"
+      width="2368"
+      height="624"
+      loading="lazy"
+      decoding="async"
+      alt={isZh ? '微信搜一搜：智简 Smart&Concise 公众号二维码' : 'WeChat QR code for 智简 Smart&Concise'}
+    />
+  </div>
+  <div class="wechat-promo__mobile">
+    <span class="wechat-promo__qr" aria-hidden="true">
+      <img src="/wechat-smart-concise.webp" width="2368" height="624" loading="lazy" decoding="async" alt="" />
+    </span>
+    <div class="wechat-promo__copy">
+      <p>{isZh ? '关注公众号' : 'FOLLOW ON WECHAT'}</p>
+      <h2 id="wechat-follow-title">智简 Smart&amp;Concise</h2>
+      <span>{isZh ? '微信搜一搜，获取独立开发与 AI 实践更新。' : 'Search in WeChat for independent development and AI updates.'}</span>
+    </div>
+  </div>
+</section>
+
 <footer class="site-footer">
   <div class="shell footer-grid">
     <div>
@@ -22,12 +45,27 @@ const prefix = isZh ? '' : '/en';
 </footer>
 
 <style>
-  .site-footer { margin-top: 110px; border-top: 7px solid var(--ink); padding: 40px 0 24px; background: var(--paper-bright); }
+  .wechat-promo { margin-top: 110px; margin-bottom: 42px; }
+  .wechat-promo__desktop { overflow: hidden; border: 1px solid rgba(0, 96, 67, .22); background: #07c160; box-shadow: 10px 10px 0 var(--ink); }
+  .wechat-promo__desktop img { display: block; width: 100%; height: auto; }
+  .wechat-promo__mobile { display: none; }
+  .site-footer { border-top: 7px solid var(--ink); padding: 40px 0 24px; background: var(--paper-bright); }
   .footer-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 48px; }
   .footer-mark { font-family: 'Newsreader', serif; font-size: 3rem; font-weight: 800; letter-spacing: -.08em; }
   .footer-mark span { color: var(--cobalt); }
   .footer-grid p { max-width: 440px; color: var(--muted); }
   nav { display: grid; align-content: start; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: .78rem; }
   .copyright { grid-column: 1 / -1; margin-top: 30px; border-top: 1px solid var(--line); padding-top: 13px; }
-  @media (max-width: 680px) { .footer-grid { grid-template-columns: 1fr; } .copyright { grid-column: auto; } }
+  @media (max-width: 680px) {
+    .wechat-promo { margin-top: 76px; margin-bottom: 30px; }
+    .wechat-promo__desktop { display: none; }
+    .wechat-promo__mobile { display: flex; align-items: center; gap: 15px; padding: 16px; border: 3px solid var(--ink); background: #07c160; color: #fff; box-shadow: 6px 6px 0 var(--ink); }
+    .wechat-promo__qr { flex: 0 0 96px; width: 96px; height: 96px; overflow: hidden; }
+    .wechat-promo__qr img { display: block; width: auto; max-width: none; height: 96px; }
+    .wechat-promo__copy p { margin: 0 0 5px; color: rgba(255, 255, 255, .82); font-family: 'IBM Plex Mono', monospace; font-size: .62rem; font-weight: 700; letter-spacing: .08em; }
+    .wechat-promo__copy h2 { margin: 0 0 5px; color: #fff; font-family: 'Newsreader', serif; font-size: 1.2rem; line-height: 1.05; }
+    .wechat-promo__copy span { display: block; font-size: .74rem; line-height: 1.45; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .copyright { grid-column: auto; }
+  }
 </style>
