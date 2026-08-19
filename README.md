@@ -1,6 +1,6 @@
 # Concitech AI Daily
 
-A bilingual, source-grounded daily AI news publication built with Astro and deployed as static files on Cloudflare Pages.
+A bilingual, source-grounded daily AI news publication and Chinese long-form archive built with Astro and deployed as static files on Cloudflare Pages.
 
 ## Local development
 
@@ -35,6 +35,8 @@ npm run covers
 ```
 
 The site stores deployable copies under `src/content/daily/`. `scripts/publish-daily.mjs` imports the latest complete bilingual pair, generates branded WebP covers, validates content, builds the site, commits only that edition and pushes `main`. Re-running the same date is idempotent.
+
+Chinese WeChat long-form articles live under `src/content/articles/`, with 1200 x 630 WebP covers under `public/article-covers/`. Their frontmatter and generated routes are checked by `scripts/validate-articles.mjs` and `scripts/smoke-test.mjs` during production verification.
 
 ## Cloudflare Pages
 

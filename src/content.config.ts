@@ -33,4 +33,28 @@ const daily = defineCollection({
   }),
 });
 
-export const collections = { daily };
+const article = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/articles' }),
+  schema: z.object({
+    title: z.string().min(8),
+    description: z.string().min(30).max(220),
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    publishedAtCST: z.coerce.date(),
+    language: z.literal('zh'),
+    author: z.string(),
+    categories: z.array(z.enum([
+      'models',
+      'products',
+      'research',
+      'devtools',
+      'business',
+      'policy',
+      'security',
+    ])).min(1),
+    cover: z.string().startsWith('/article-covers/'),
+    wechatMediaId: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { daily, article };

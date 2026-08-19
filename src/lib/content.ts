@@ -2,6 +2,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import type { CategoryId } from '../data/site';
 
 export type DailyEntry = CollectionEntry<'daily'>;
+export type ArticleEntry = CollectionEntry<'article'>;
 export type Language = 'zh' | 'en';
 
 export function dateKey(value: string): string {
@@ -15,6 +16,10 @@ export function editionPath(language: Language, date: string): string {
 export function localizedPath(language: Language, path: string): string {
   if (language === 'zh') return path;
   return path === '/' ? '/en/' : `/en${path}`;
+}
+
+export function articlePath(slug: string): string {
+  return `/articles/${slug}/`;
 }
 
 export function formatDate(value: string, language: Language, style: 'long' | 'short' = 'long'): string {
@@ -42,6 +47,11 @@ export function formatCST(value: Date, language: Language): string {
 export async function getDaily(language?: Language): Promise<DailyEntry[]> {
   const entries = await getCollection('daily', ({ data }) => !data.draft && (!language || data.language === language));
   return entries.sort((a, b) => b.data.datePT.localeCompare(a.data.datePT));
+}
+
+export async function getArticles(): Promise<ArticleEntry[]> {
+  const entries = await getCollection('article', ({ data }) => !data.draft);
+  return entries.sort((a, b) => b.data.publishedAtCST.getTime() - a.data.publishedAtCST.getTime());
 }
 
 export async function getEdition(language: Language, date: string): Promise<DailyEntry | undefined> {

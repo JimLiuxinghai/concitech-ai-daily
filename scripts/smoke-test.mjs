@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import matter from 'gray-matter';
 
 const root = resolve(import.meta.dirname, '..');
 const dist = resolve(root, 'dist');
@@ -8,6 +9,7 @@ const required = [
   'index.html',
   'en/index.html',
   'archive/index.html',
+  'articles/index.html',
   'en/archive/index.html',
   'rss.xml',
   'en/rss.xml',
@@ -43,6 +45,7 @@ if (existsSync(resolve(dist, 'index.html'))) {
   for (const type of ['WebSite', 'Organization']) {
     if (!homeTypes.includes(type)) failures.push(`home JSON-LD is missing ${type}`);
   }
+  if (!home.includes('href="/articles/"')) failures.push('home is missing the long-form article archive link');
 }
 
 const contentDir = resolve(root, 'src/content/daily');
@@ -65,10 +68,28 @@ for (const date of zhDates) {
   }
 }
 
+const articleDir = resolve(root, 'src/content/articles');
+const articles = readdirSync(articleDir)
+  .filter((file) => file.endsWith('.md'))
+  .map((file) => matter(readFileSync(resolve(articleDir, file), 'utf8')).data);
+
+for (const article of articles) {
+  const route = resolve(dist, 'articles', article.slug, 'index.html');
+  if (!existsSync(route)) {
+    failures.push(`missing article route for ${article.slug}`);
+    continue;
+  }
+  const html = readFileSync(route, 'utf8');
+  const h1Count = (html.match(/<h1(?:\s|>)/g) ?? []).length;
+  if (h1Count !== 1) failures.push(`article route for ${article.slug} has ${h1Count} H1 elements instead of one`);
+  if (!structuredDataFor(html).some((item) => item['@type'] === 'Article')) failures.push(`article route for ${article.slug} is missing Article JSON-LD`);
+  if (!html.includes(`src="${article.cover}"`)) failures.push(`article route for ${article.slug} is missing its cover`);
+}
+
 if (failures.length) {
   console.error(`Smoke test failed with ${failures.length} issue(s):`);
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
 
-console.log(`Smoke test passed: ${zhDates.size} bilingual editions and ${required.length} required static assets.`);
+console.log(`Smoke test passed: ${zhDates.size} bilingual editions, ${articles.length} long-form articles, and ${required.length} required static assets.`);

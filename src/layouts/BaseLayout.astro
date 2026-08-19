@@ -10,7 +10,7 @@ interface Props {
   description: string;
   language: Language;
   canonicalPath: string;
-  alternatePath: string;
+  alternatePath?: string;
   image?: string;
   article?: boolean;
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
@@ -27,7 +27,8 @@ const {
   structuredData,
 } = Astro.props;
 const canonical = new URL(canonicalPath, SITE.origin);
-const alternate = new URL(alternatePath, SITE.origin);
+const alternate = alternatePath ? new URL(alternatePath, SITE.origin) : undefined;
+const headerAlternatePath = alternatePath ?? (language === 'zh' ? '/en/' : '/');
 const imageUrl = new URL(image, SITE.origin);
 const analyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 const fullTitle = title.includes('Concitech AI') ? title : `${title} · ${language === 'zh' ? SITE.zhName : SITE.enName}`;
@@ -44,8 +45,8 @@ const structuredDataJson = structuredData ? JSON.stringify(structuredData).repla
     <meta name="description" content={description} />
     <meta name="theme-color" content="#f4f0e7" />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang={language === 'zh' ? 'en' : 'zh-CN'} href={alternate} />
-    <link rel="alternate" hreflang="x-default" href={language === 'zh' ? canonical : alternate} />
+    {alternate && <link rel="alternate" hreflang={language === 'zh' ? 'en' : 'zh-CN'} href={alternate} />}
+    {alternate && <link rel="alternate" hreflang="x-default" href={language === 'zh' ? canonical : alternate} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={language === 'zh' ? SITE.zhName : SITE.enName} href={language === 'zh' ? '/rss.xml' : '/en/rss.xml'} />
     <meta property="og:type" content={article ? 'article' : 'website'} />
@@ -60,7 +61,7 @@ const structuredDataJson = structuredData ? JSON.stringify(structuredData).repla
   </head>
   <body>
     <a class="skip-link" href="#main">{language === 'zh' ? '跳到正文' : 'Skip to content'}</a>
-    <SiteHeader {language} {alternatePath} />
+    <SiteHeader {language} alternatePath={headerAlternatePath} />
     <main id="main"><slot /></main>
     <SiteFooter {language} />
     {analyticsToken && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>}

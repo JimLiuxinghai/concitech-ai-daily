@@ -1,0 +1,88 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { CATEGORIES, SITE } from '../data/site';
+import { articlePath, formatCST, type ArticleEntry } from '../lib/content';
+
+const { entry } = Astro.props as { entry: ArticleEntry };
+const canonicalPath = articlePath(entry.data.slug);
+const { Content, headings } = await render(entry);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  '@id': `${new URL(canonicalPath, SITE.origin).href}#article`,
+  headline: entry.data.title,
+  description: entry.data.description,
+  inLanguage: 'zh-CN',
+  datePublished: entry.data.publishedAtCST.toISOString(),
+  dateModified: entry.data.publishedAtCST.toISOString(),
+  mainEntityOfPage: new URL(canonicalPath, SITE.origin).href,
+  image: new URL(entry.data.cover, SITE.origin).href,
+  author: { '@type': 'Person', name: entry.data.author },
+  publisher: {
+    '@type': 'Organization',
+    '@id': `${SITE.origin}/#organization`,
+    name: 'Concitech AI',
+    url: SITE.origin,
+  },
+};
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description} language="zh" {canonicalPath} image={entry.data.cover} article {structuredData}>
+  <article>
+    <header class="article-head shell">
+      <div class="article-kicker">
+        <p class="eyebrow">Concitech AI · 深度长文</p>
+        <p class="mono">{formatCST(entry.data.publishedAtCST, 'zh')}</p>
+      </div>
+      <h1>{entry.data.title}</h1>
+      <p class="description">{entry.data.description}</p>
+      <div class="article-byline">
+        <strong>{entry.data.author}</strong>
+        <div class="category-row">
+          {entry.data.categories.map((id) => <span class="category-chip">{CATEGORIES[id].zh}</span>)}
+        </div>
+      </div>
+      <img class="hero-cover" src={entry.data.cover} alt="" width="1200" height="630" fetchpriority="high" />
+    </header>
+
+    <div class="article-shell shell">
+      {headings.length > 2 && (
+        <aside class="contents">
+          <p class="mono">文章目录</p>
+          <ol>{headings.filter((heading) => heading.depth === 2).map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+        </aside>
+      )}
+      <div class="prose"><Content /></div>
+    </div>
+
+    <footer class="article-footer shell">
+      <p>本文首发于 JimLiu 的微信公众号，由 Concitech AI 长文归档收录。</p>
+      <a class="button" href="/articles/">返回长文归档 →</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-head { padding: 72px 0 0; }
+  .article-kicker { display: flex; justify-content: space-between; border-top: 2px solid var(--ink); padding-top: 10px; }
+  .article-head h1 { max-width: 1150px; margin: 58px 0 28px; overflow-wrap: anywhere; font-size: clamp(3.2rem, 7vw, 7rem); }
+  .description { max-width: 850px; color: #3c4951; font-family: 'Newsreader', 'Noto Sans SC', serif; font-size: clamp(1.3rem, 2vw, 1.7rem); line-height: 1.4; }
+  .article-byline { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 40px 0 28px; }
+  .category-row { display: flex; flex-wrap: wrap; gap: 18px; }
+  .hero-cover { width: 100%; aspect-ratio: 1200 / 630; border: 1px solid var(--ink); object-fit: cover; }
+  .article-shell { position: relative; padding-top: 74px; }
+  .contents { position: absolute; left: 0; width: min(220px, 18vw); color: var(--muted); font-size: .78rem; line-height: 1.45; }
+  .contents ol { margin: 14px 0 0; padding-left: 18px; }
+  .contents li { margin-bottom: 8px; }
+  .article-footer { display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-top: 80px; border: solid var(--ink); border-width: 2px 0; padding: 24px 0; }
+  .article-footer p { margin: 0; }
+  @media (max-width: 1060px) { .contents { position: static; width: min(100%, var(--reading)); margin: 0 auto 50px; border-bottom: 1px solid var(--line); padding-bottom: 20px; } }
+  @media (max-width: 700px) {
+    .article-head { padding-top: 48px; }
+    .article-head h1 { margin-top: 38px; font-size: clamp(2.65rem, 13vw, 4rem); }
+    .article-kicker { align-items: flex-start; flex-direction: column; gap: 5px; }
+    .article-kicker p { margin-bottom: 0; }
+    .article-byline, .article-footer { align-items: flex-start; flex-direction: column; }
+  }
+</style>

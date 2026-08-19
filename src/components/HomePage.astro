@@ -1,14 +1,16 @@
 ---
 import StoryCard from './StoryCard.astro';
+import ArticleCard from './ArticleCard.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { CATEGORIES, CATEGORY_IDS, SITE } from '../data/site';
-import { dateKey, editionPath, formatDate, getDaily, type Language } from '../lib/content';
+import { dateKey, editionPath, formatDate, getArticles, getDaily, type Language } from '../lib/content';
 
 const { language } = Astro.props as { language: Language };
 const isZh = language === 'zh';
 const entries = await getDaily(language);
 const latest = entries[0];
 const recent = entries.slice(1, 7);
+const articles = isZh ? (await getArticles()).slice(0, 3) : [];
 const prefix = isZh ? '' : '/en';
 const alternatePath = isZh ? '/en/' : '/';
 const title = isZh ? 'Concitech AI 日报｜每日 AI 新闻编辑摘要' : 'Concitech AI Daily | An editorial AI news digest';
@@ -82,6 +84,16 @@ const structuredData = {
           ))}
         </div>
       </section>
+
+      {isZh && articles.length > 0 && (
+        <section class="long-reads shell">
+          <div class="section-rule mono"><span>深度长文</span><span>{String(articles.length).padStart(2, '0')}</span></div>
+          <div class="long-read-list">
+            {articles.map((entry, index) => <ArticleCard {entry} featured={index === 0} />)}
+          </div>
+          <p class="more"><a class="button" href="/articles/">查看全部长文 →</a></p>
+        </section>
+      )}
     </>
   ) : (
     <section class="empty shell">
@@ -107,6 +119,8 @@ const structuredData = {
   .topic-list a { display: grid; grid-template-columns: 60px 1fr auto; align-items: center; gap: 20px; border-bottom: 1px solid var(--ink); padding: 14px 4px; text-decoration: none; transition: padding .15s ease, background .15s ease; }
   .topic-list a:hover { padding-inline: 14px; color: white; background: var(--cobalt); }
   .topic-list strong { font-family: 'Newsreader', 'Noto Sans SC', serif; font-size: clamp(1.5rem, 3vw, 2.5rem); }
+  .long-reads { padding-bottom: 74px; }
+  .long-read-list { display: grid; gap: 28px; }
   .empty { min-height: 70vh; padding-block: 100px; }
   @media (max-width: 900px) { .lead { grid-template-columns: 1fr; min-height: auto; } .cover-link { margin: 10px 12px 24px 0; } }
 </style>

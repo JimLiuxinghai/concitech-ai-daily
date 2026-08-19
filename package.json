@@ -10,7 +10,7 @@
     "check": "astro check",
     "test:semantics": "node scripts/semantic-regression-test.mjs",
     "test:smoke": "node scripts/smoke-test.mjs",
-    "validate": "node scripts/validate-content.mjs",
+    "validate": "node scripts/validate-content.mjs && node scripts/validate-articles.mjs",
     "covers": "node scripts/generate-covers.mjs",
     "import": "node scripts/import-daily.mjs",
     "backfill:english": "node scripts/backfill-english.mjs",

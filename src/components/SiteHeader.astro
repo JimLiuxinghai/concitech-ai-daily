@@ -17,6 +17,7 @@ const isZh = language === 'zh';
       <span class="name">{isZh ? 'Concitech AI 日报' : 'Concitech AI Daily'}</span>
     </a>
     <nav aria-label={isZh ? '主导航' : 'Main navigation'}>
+      {isZh && <a href="/articles/">长文</a>}
       <a href={isZh ? '/archive/' : '/en/archive/'}>{isZh ? '归档' : 'Archive'}</a>
       <a href={isZh ? '/about/' : '/en/about/'}>{isZh ? '关于' : 'About'}</a>
       <a class="language" href={alternatePath} hreflang={isZh ? 'en' : 'zh-CN'}>{isZh ? 'EN' : '中文'}</a>
@@ -34,5 +35,9 @@ const isZh = language === 'zh';
   nav { display: flex; align-items: center; gap: clamp(15px, 3vw, 32px); font-family: 'IBM Plex Mono', monospace; font-size: .74rem; text-transform: uppercase; }
   nav a { text-decoration: none; }
   .language { padding: 7px 10px; border: 1px solid var(--ink); }
-  @media (max-width: 560px) { .name { display: none; } nav { gap: 12px; } }
+  @media (max-width: 560px) {
+    .name { display: none; }
+    nav { gap: 9px; font-size: .68rem; }
+    .language { padding: 5px 7px; }
+  }
 </style>
