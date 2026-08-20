@@ -1,5 +1,5 @@
 ---
-title: "Codex额度突然缩水76%？真正的后手，藏在普通ChatGPT里"
+title: "Codex额度用完怎么办？有人找到了一个新入口"
 description: "社区监测显示部分Codex账户的周额度大幅下降。与此同时，一条通过Remote MCP连接本地开发环境的新路径，暴露了ChatGPT订阅里容易被忽略的第二个入口。"
 slug: "codex-quota-chatgpt-mcpx"
 publishedAtCST: "2026-08-21T03:07:46+08:00"
