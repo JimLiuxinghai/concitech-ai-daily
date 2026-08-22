@@ -1,5 +1,5 @@
 ---
-title: "Anthropic内部最近火了一个 /eli5，核心竟然只有两句话"
+title: "Anthropic内部最近流行一个新工具，核心源码只有10行"
 description: "一个没有脚本、模板和专用模型的Claude Code Skill，只靠两句指令就能把复杂系统变成大图少字的HTML图解。它展示的不是一个小技巧，而是一种新的软件生产方式。"
 slug: "anthropic-eli5-skill"
 publishedAtCST: "2026-08-22T13:20:42+08:00"
