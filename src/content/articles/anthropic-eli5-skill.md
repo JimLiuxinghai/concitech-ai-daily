@@ -7,7 +7,7 @@ language: zh
 author: JimLiu
 categories: [devtools, products]
 cover: "/article-covers/anthropic-eli5-skill.webp"
-wechatMediaId: "qwac_8j4kaaga6WV5YUa-RGMY1JgFMfvSO6Ri0MmekqN7PJHPd0cFP_-cIISSwao"
+wechatMediaId: "qwac_8j4kaaga6WV5YUa-RxHAlJDY8UJWcVSN8_UfGyt_H-D9glcO99I2Go030-8"
 draft: false
 ---
 
@@ -30,6 +30,10 @@ Anthropic 内部最近有人频繁使用一个叫 `/eli5` 的 Claude Code Skill�
 Claude 不会返回一篇密密麻麻的长文，而是生成一个 HTML 页面，用大图、流程和很少的文字，把问题讲给一个没有相关背景的人。
 
 公开演示里，Claude 把一个 Discord Bot 的工作方式整理成一页可视化说明。网站、机器人、数据库、管理员和 Discord 之间的关系，被拆成几张顺着阅读就能看懂的流程图。
+
+![ELI5 生成的 Discord Bot 整体架构图](/article-images/anthropic-eli5-skill/eli5-overview.webp)
+
+*公开演示截图：页面先用一张图交代网站、机器人、Discord 与数据库的整体关系。*
 
 这个效果看起来像一个完整功能。
 
@@ -76,6 +80,10 @@ ELI5 是 “Explain Like I'm Five” 的缩写，通常被理解成“用五岁�
 聊天回答是线性的。模型从第一段写到最后一段，读者必须在脑子里记住前面出现的组件，再把它们拼成一张关系图。系统稍微复杂一点，文字就会越来越长。
 
 HTML Artifact 可以把关系放到空间里。组件能并排出现，箭头能表达方向，颜色能区分角色，步骤能形成明显层级。读者先看到整体，再决定要不要钻进细节。
+
+![ELI5 生成的分步流程图](/article-images/anthropic-eli5-skill/eli5-step-flow.webp)
+
+*公开演示截图：页面继续向下展开，把机器人发布卡片的过程拆成独立步骤。*
 
 这对代码和技术系统尤其有效。
 
