@@ -64,6 +64,7 @@ const structuredDataJson = structuredData ? JSON.stringify(structuredData).repla
     <SiteHeader {language} alternatePath={headerAlternatePath} />
     <main id="main"><slot /></main>
     <SiteFooter {language} />
+    <script is:inline type="module" src="/webmcp.js"></script>
     {analyticsToken && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>}
   </body>
 </html>
