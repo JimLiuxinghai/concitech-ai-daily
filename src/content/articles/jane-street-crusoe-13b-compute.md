@@ -23,7 +23,7 @@ draft: false
 
 如果这次报道属实，Jane Street 在两家专业 GPU 云厂商处签下的云合同规模将达到约 190 亿美元。
 
-![Jane Street 在 2026 年公开确认与据报道的两笔 AI 云合同。10 亿美元 CoreWeave 股权投资单独列示，不计入云合同。](/article-images/jane-street-crusoe-13b-compute/commitments.png)
+![Jane Street 在 2026 年公开确认与据报道的两笔 AI 云合同。10 亿美元 CoreWeave 股权投资单独列示，不计入云合同。](/article-images/jane-street-crusoe-13b-compute/commitments.webp)
 
 用“金融公司也在试用 AI”来概括，已经明显不够。Jane Street 正在把自己的研究机器扩建到数据中心尺度。
 
@@ -53,7 +53,7 @@ Jane Street 官网有一句很不寻常的自我介绍：可以把它想成“�
 
 真正进入交易环节后，目标换成了延迟和稳定性。Jane Street 的性能工程页面提到，一些推理系统必须在微秒尺度内响应。这里要靠低延迟网络、CPU、定制硬件、编译器和精心优化的 CUDA 代码共同完成，不能只看 GPU 数量。
 
-![量化交易的两段算力链：离线训练重吞吐，在线交易重延迟。GPU 集群很重要，但不能替代低延迟网络和执行系统。](/article-images/jane-street-crusoe-13b-compute/training-vs-trading.png)
+![量化交易的两段算力链：离线训练重吞吐，在线交易重延迟。GPU 集群很重要，但不能替代低延迟网络和执行系统。](/article-images/jane-street-crusoe-13b-compute/training-vs-trading.webp)
 
 可以把它理解成两条紧挨着的生产线：前一条不断制造更好的模型，后一条负责在极短时间内把模型输出变成真实订单。算力投入首先缩短的是研究周期，最终才可能转化成交易优势。
 
@@ -67,7 +67,7 @@ CoreWeave 和 Crusoe 都属于近几年快速扩张的专业 AI 云厂商。它�
 
 同时向两家供应商采购，也能降低单点依赖。CoreWeave 的已确认协议包括下一代 NVIDIA Vera Rubin 算力；Crusoe 若能履约，则再提供一条独立的扩容路径。具体工作负载会怎样分配，目前没有公开信息，不能断言某家负责训练、另一家负责推理。
 
-![Jane Street 的算力采购逻辑：用多家专业 AI 云厂商预订未来容量，减少单一供应商与单一园区带来的交付风险。](/article-images/jane-street-crusoe-13b-compute/two-clouds.png)
+![Jane Street 的算力采购逻辑：用多家专业 AI 云厂商预订未来容量，减少单一供应商与单一园区带来的交付风险。](/article-images/jane-street-crusoe-13b-compute/two-clouds.webp)
 
 从供应商视角看，Jane Street 也很有吸引力。前沿模型公司是 AI 云最显眼的客户，但它们融资、训练节奏和模型路线变化很快。量化交易公司能带来另一种需求：预算来自交易业务，数据和模型长期迭代，而且对保密、性能与稳定性要求很高。
 
@@ -81,7 +81,7 @@ Crusoe 2018 年成立时，做的是一门颇具争议、但工程逻辑很直�
 
 2025 年，Crusoe 把比特币挖矿和 Digital Flare Mitigation 业务出售给 NYDIG，把资源集中到 AI 数据中心与云平台。公司官网称，它参与建设了得州阿比林 1.2 吉瓦的 Stargate 园区。到 2026 年 6 月，Crusoe 宣布已签约的 AI 基础设施容量达到 4.9 吉瓦，开发管线超过 40 吉瓦。
 
-![Crusoe 的业务迁移：从油田伴生气供电与比特币挖矿，转向大规模 AI 数据中心和 GPU 云。](/article-images/jane-street-crusoe-13b-compute/crusoe-pivot.png)
+![Crusoe 的业务迁移：从油田伴生气供电与比特币挖矿，转向大规模 AI 数据中心和 GPU 云。](/article-images/jane-street-crusoe-13b-compute/crusoe-pivot.webp)
 
 同一周，TechCrunch 援引知情人士称 Crusoe 正以约 300 亿美元估值融资 30 亿美元。融资与大客户合同在时间上靠得很近，但外界看不到合同条款，也不能据此判断融资估值是否合理。
 
@@ -95,7 +95,7 @@ Crusoe 2018 年成立时，做的是一门颇具争议、但工程逻辑很直�
 
 但这笔交易不能证明整个华尔街都开始了 GPU 军备竞赛。Jane Street 有独特的研究文化、资本实力和技术栈，一家公司不能代表所有银行、券商或对冲基金。它也不能证明 190 亿美元的云承诺一定能产生更高交易利润。
 
-![阅读 130 亿美元合同需要保留的四个边界：报道状态、付款口径、交付细节和行业代表性。](/article-images/jane-street-crusoe-13b-compute/deal-caveats.png)
+![阅读 130 亿美元合同需要保留的四个边界：报道状态、付款口径、交付细节和行业代表性。](/article-images/jane-street-crusoe-13b-compute/deal-caveats.webp)
 
 我更在意的其实是另一件事。
 
