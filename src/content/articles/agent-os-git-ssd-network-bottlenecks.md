@@ -1,61 +1,65 @@
 ---
 title: "Agent 的新瓶颈：Git、SSD、内存和网络"
-description: "两条讨论聚焦 Agent 基础设施。话题包括工具调用、工作区、内存与截图传输。本文核对 Git 文档、LayerFS 项目和 Sema 论文，区分工程经历与速度预测。"
+description: "Agent 任务包含模型推理、Git 操作、工作区创建、进程运行和网络传输。模型提速改变各环节的耗时比例；并发任务增加 SSD 与内存压力。本文拆解延迟账本、工作区成本、资源配额和截图上行瓶颈。"
 slug: "agent-os-git-ssd-network-bottlenecks"
-publishedAtCST: "2026-10-07T06:48:00+08:00"
+publishedAtCST: "2026-10-07T07:54:00+08:00"
 language: zh
 author: JimLiu
 categories: [devtools, research]
 cover: "/article-covers/agent-os-git-ssd-network-bottlenecks.webp"
-wechatMediaId: "qwac_8j4kaaga6WV5YUa-Z741ADdcbl_D3lQe5htEJcyiBLAUvdfpHc_fFLNynrJ"
+wechatMediaId: "qwac_8j4kaaga6WV5YUa-VVtY6rTQXl0zzrNRVdNrZxepUrnV9S96rlphyhSG0Rw"
 draft: false
 ---
 
-模型提速，Agent 提速吗？[徐一帆的一条讨论](https://x.com/yifanxu_ephai/status/2107104655490912678)把问题转向机器本身：CPU、内存、SSD、网络，以及一个不起眼的 `git add`。[李博杰的回复](https://x.com/bojie_li/status/2107469512476098813)补上生产环境的细节：工作区占满硬盘，并行任务压住内存，截图上传吃掉等待时间。
+模型吞吐量上升，Agent 任务耗时的结构发生变化。一次代码任务包含推理、工具调用、文件读写、测试和结果提交。一次 Computer Use 任务包含截图、上行传输、模型判断与动作执行。任务的完成时间属于整条执行链。
 
-这两条帖子提出一项工程问题：Agent 是一条执行链。模型、工具、文件系统和网络决定任务耗时。这组示例固定其他环节的耗时，推理时间缩短抬高了工具耗时占比。GPU 的资源需求属于另一项问题。
+工程预算需要两个账本：单任务的端到端延迟，以及并发任务的资源峰值。前者回答“用户等多久”，后者回答“机器能承载多少任务”。Git、SSD、内存和网络对应不同成本。
 
-## 一个 `git add`，暴露延迟账本
+## Git：模型提速改变延迟占比
 
-徐一帆给出一组例子：一次模型推理耗时 10 秒，`git add` 耗时 3 秒。单轮合计 13 秒，Git 操作占约 23%。他的设想把模型推理压到 0.5 秒，Git 操作保持 3 秒。单轮合计变成 3.5 秒，Git 操作占约 86%。
+单轮耗时的简化账本是：**推理时间 + 工具时间 + 环境等待时间**。工具时间包含 Git、测试、依赖安装等操作。模型速度属于其中一项变量。
 
-![模型推理速度假设与 Git 操作的单轮耗时占比；数字取自徐一帆的示例](/article-images/agent-os-git-ssd-network-bottlenecks/latency-budget.webp)
+一个算术示例：推理耗时 10 秒，`git add` 耗时 3 秒。两项合计 13 秒，Git 占 23%。另一组假设保留 3 秒 Git 耗时，推理耗时改为 0.5 秒。两项合计 3.5 秒，Git 占 86%。这组数字是比例演示。仓库、硬件和缓存条件缺席。基准测试结论缺少依据。
 
-这个计算属于示例。通用 benchmark 需要统一的仓库和硬件条件。0.5 秒推理属于速度假设；`git add` 的耗时取决于仓库规模、文件数量、磁盘状态和索引配置。**单轮耗时 = 推理时间 + 工具执行时间 + 环境等待时间。** 模型提速改变其中一项。
+![推理时间与 Git 时间的假设计算：10 秒加 3 秒；0.5 秒加 3 秒](/article-images/agent-os-git-ssd-network-bottlenecks/latency-budget.webp)
 
-李博杰提供另一组工程经历。他称团队的核心 Agent 系统采用 Go。团队的 Python 实时语音方案面临单核并发与实时性问题。该案例描述特定架构；其他 Python 语音系统的并发能力需要独立测试。他称多个子 Agent 的任务造成内存压力，服务器出现 SSH 连接失败。帖子给出工程经历；可复查的压测数据缺席。
+[`git add` 的官方文档](https://git-scm.com/docs/git-add)说明，该命令把指定文件的内容放入索引。文件规模、文件数、存储状态与索引配置影响一次调用的开销。性能分析需要拆出文件枚举、内容读取和索引写入等阶段；一次命令的总耗时提供整体结果，阶段归因需要额外测量。
 
-## Worktree 把“并行”变成硬盘问题
+Agent 的多轮任务放大这个问题。每轮动作产生工具调用与校验；任何一段等待进入总账。优化目标因任务而异：代码编辑关注仓库和测试，浏览器操作关注页面加载和截图，远程环境关注队列与容器启动。
 
-多 Agent 开发要求隔离工作区。[Git 官方文档](https://git-scm.com/docs/git-worktree)说明，linked worktree 允许同一仓库拥有多个工作树。它们共享仓库管理数据；每个工作树保留独立目录。项目源码、构建产物和依赖缓存产生磁盘成本。
+## SSD：隔离工作区有物理成本
 
-李博杰称，开发机的单个 worktree 占用数 GB，子 Agent 遗留的工作区填满 3 TB SSD。这组数字属于他的项目；Git worktree 的开销取决于工作目录内容。工作区生命周期带来一个问题：谁负责判断保留期限、清理对象和可恢复范围？
+并发代码任务需要隔离目录。[Git worktree 文档](https://git-scm.com/docs/git-worktree)说明，多个工作树共享仓库管理数据。每棵工作树拥有工作目录与独立索引。共享版本对象减轻仓库复制成本；工作文件、依赖目录、构建产物与日志构成磁盘占用。依赖与缓存的共享程度取决于项目配置。
 
-[LayerFS 项目](https://github.com/Ephemeral-AI-Lab/layerfs)提供一种实验方向：共享基础内容，使用内容寻址与写时复制记录增量，给每个 Agent 分配隔离工作区。项目仓库把 0.1.6 标为 Developer Preview。其存储缺少断电持久性保证，仓库要求重要数据保留独立副本。项目呈现一种解决思路；企业级落地需要更多验证。
+工作区的成本有三部分：基础文件、任务写入增量和遗留数据。任务结束后的目录、容器层、测试产物和日志形成长尾。创建速度、单任务磁盘增量、磁盘峰值、回收时间与失败回收率构成工作区指标。Git 的 `worktree prune` 处理失效管理信息；工作文件的删除与保留属于另一项操作，涉及未提交成果。
 
-![并行 Agent 的资源生命周期：创建、运行、提交、回收；工作区管理包含文件、进程与配额](/article-images/agent-os-git-ssd-network-bottlenecks/workspace-lifecycle.webp)
+[LayerFS 仓库](https://github.com/Ephemeral-AI-Lab/layerfs)展示一条研究路线：内容寻址、分块和写时复制复用基础内容，任务分支保留增量。项目的 0.1.6 版本属于 Developer Preview，仓库声明缺少断电持久性保证。它说明增量存储的设计方向，生产数据需要可靠副本。
 
-## 截图传输占据另一段等待时间
+![Agent 工作区的生命周期：创建、运行、提交和回收](/article-images/agent-os-git-ssd-network-bottlenecks/workspace-lifecycle.webp)
 
-Computer Use 的循环包含截图采集、上传、模型判断和动作执行。李博杰称，部分客户的截图上传耗时超过模型推理耗时。这项描述来自他的客户经历。[他参与的 Sema 论文](https://arxiv.org/abs/2604.20940)提供一组实验数据：受限上行链路的视觉流程，截图上传占端到端动作延迟的比例超过 60%。
+## 内存：并发数决定资源峰值
 
-Sema 的视觉表征包含可访问性树或 OCR 文本，以及压缩视觉 Token。论文的模拟 WAN 实验报告截图上行带宽缩减 130 至 210 倍，任务准确率与原始传输的差距小于等于 0.7 个百分点。这是作者实验条件下的结果；带宽压缩倍数与客户网络的延迟改善倍数属于不同指标。
+一个 Agent 任务占用模型客户端、工具进程、语言服务、测试进程和浏览器内存。任务副本数量增加，进程常驻内存与瞬时峰值叠加。八个任务、每个任务 1.5 GB 工作集，单项合计 12 GB；共享服务、文件缓存和峰值突发构成其他需求。这是容量计算示例，实际额度需要进程测量。
 
-![Computer Use 的执行链：截图、网络、模型、动作；网络成本与推理成本的占比比较](/article-images/agent-os-git-ssd-network-bottlenecks/computer-use-path.webp)
+内存不足带来换页、进程终止和任务重试。重试增加 CPU 与磁盘负荷。调度器需要任务并发上限、内存配额、超限处置、进程树回收和队列背压。平均内存掩盖高峰；任务峰值与机器峰值属于两张不同报表。
 
-## “Agent 操作系统”需要哪些能力
+## 网络：截图传输占据任务延迟
 
-李博杰提出三个方向：低延迟任务管理、Agent 与用户的 UI 隔离、软件自我修改。他的工程经历指向资源调度与工作区回收。Agent 运行平台需要任务队列、CPU 与内存配额、工作区生命周期、可取消的工具调用，以及人机并行操作的权限边界。这里的“操作系统”指一组运行时能力；替代 Windows 或 Linux 的新内核属于另一项命题。
+Computer Use 包含截图采集、上传、模型判断和动作执行。上行传输量与有效带宽决定纯上传时间。一个示意计算：截图 8 MB，有效上行 8 Mbps，纯上传时间为 8 秒。压缩、排队和网络往返形成额外开销。
 
-原帖提到 OpenAI 对 Omarchy 的支持。[Omarchy 基金会公告](https://omarchy.org/news/2026/09/omacom-foundation-secures-tokens-from-leading-labs/)列出的事实是 OpenAI 提供 **15 万美元的 Token 赞助**。赞助确认合作关系；Agent 操作系统研发计划缺少对应公告。
+[Sema 论文](https://arxiv.org/abs/2604.20940)报告一组受限上行链路实验：截图上传占动作端到端延迟的比例超过 60%。论文提出可访问性树或 OCR 文本与压缩视觉 Token 的组合。模拟 WAN 实验中的截图上行带宽缩减 130 至 210 倍，任务准确率与原始传输的差距小于等于 0.7 个百分点。**带宽缩减倍数与延迟改善倍数属于不同指标。**这些数据对应论文实验条件。
 
-模型速度的增长改变系统各段的相对成本。Agent 数量增加放大资源争用。Agent 工程的计分板需要四项指标：模型能力、单轮端到端延迟、每任务存储增量、失败任务的资源回收时间。
+![Computer Use 的截图、上行网络、模型和动作执行链](/article-images/agent-os-git-ssd-network-bottlenecks/computer-use-path.webp)
+
+## Agent 平台需要任务级计分板
+
+模型调用耗时是一项指标。任务平台需要端到端延迟的中位数与尾部值、各工具阶段耗时、单任务磁盘增量、进程内存峰值、上行字节数和失败任务回收时间。指标对应不同优化对象。
+
+任务队列决定并发；资源配额约束 CPU、内存和 SSD；工作区生命周期管理成果与临时数据；网络表征决定截图与语义信息的传输量。Agent 系统的性能目标是任务完成成本与可靠性，模型速度占据这张账本的一列。
 
 ## 参考资料
 
-- [徐一帆：CPU、RAM、SSD 与网络的瓶颈讨论](https://x.com/yifanxu_ephai/status/2107104655490912678)
-- [李博杰：Agent 系统与生产环境经历](https://x.com/bojie_li/status/2107469512476098813)
+- [Git 官方文档：git-add](https://git-scm.com/docs/git-add)
 - [Git 官方文档：git-worktree](https://git-scm.com/docs/git-worktree)
-- [LayerFS 官方仓库](https://github.com/Ephemeral-AI-Lab/layerfs)
+- [LayerFS 项目仓库与版本限制](https://github.com/Ephemeral-AI-Lab/layerfs)
 - [Sema 论文：Semantic Transport for Real-Time Multimodal Agents](https://arxiv.org/abs/2604.20940)
-- [Omarchy 基金会：OpenAI Token 赞助](https://omarchy.org/news/2026/09/omacom-foundation-secures-tokens-from-leading-labs/)
