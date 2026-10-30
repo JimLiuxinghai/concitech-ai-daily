@@ -12,6 +12,7 @@ categories:
   - products
 cover: /article-covers/ai-browser-automation-eight-routes-engineering.webp
 draft: false
+wechatMediaId: qwac_8j4kaaga6WV5YUa-d_q7X5dG7DPEXuwBnNWqM3Y2BK7G8MQrg_ScBew9NQJ
 ---
 
 一个订单导出任务，包含登录、日期筛选、分页、字段提取和文件生成。Agent 的演示视频展示鼠标与按钮，生产系统的验收对象是订单条数、金额、权限和任务记录。

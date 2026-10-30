@@ -10,6 +10,7 @@ categories:
   - business
 cover: /article-covers/ai-earnings-growth-cash-flow-test.webp
 draft: false
+wechatMediaId: qwac_8j4kaaga6WV5YUa-ZYO7uAbSrrgVb4rzz-k14rwExJbDaSSJJtOVwoMTinU
 ---
 
 AWS 的三季度收入增速是39.3%，亚马逊滚动十二个月自由现金流约为负424亿美元。需求增长与现金支出构成同一份财报的两个侧面。
