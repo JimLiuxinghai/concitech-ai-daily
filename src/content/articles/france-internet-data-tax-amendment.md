@@ -2,7 +2,7 @@
 title: 法国“流量税”修正案通过：每 GB 0.055 欧元，谁买单？
 description: 一项法国预算修正案引发争议。文章解释计税方式、付款方、价格风险与立法状态。
 slug: france-internet-data-tax-amendment
-publishedAtCST: '2026-10-31T16:40:00+08:00'
+publishedAtCST: '2026-10-31T16:33:00+08:00'
 language: zh
 author: JimLiu
 wechatMediaId: 'qwac_8j4kaaga6WV5YUa-UQrhHGR-wo6kt39el1da9rdj-LHNFqfBRlbcGMULZTL'
