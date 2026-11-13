@@ -16,7 +16,7 @@ wechatMediaId: qwac_8j4kaaga6WV5YUa-VNnbLbMsTOIdoGdYpHXyew9TiR-KD8rzEzy9y5803F4
 
 **浏览器拥有现成能力，AI生成的代码保留着一套重复实现。**
 
-文本框的自动增高、弹层控制、折叠动画、表单验证，这些需求都有平台层面的解决方案。训练数据与项目旧代码中的历史写法，构成了Coding Agent的另一种参考来源。
+文本框的自动增高、弹层控制、折叠动画、表单验证，这些需求具有平台层面的解决方案。训练数据与项目旧代码中的历史写法，构成了Coding Agent的另一种参考来源。
 
 GoogleChrome仓库中的**Modern Web Guidance**，面向这类问题。它为编码智能体提供专家编写的Web指南、浏览器兼容信息和旧模式扫描工具。[1][2]
 
@@ -30,7 +30,7 @@ README声明的覆盖范围是**250项现代Web特性**。250的统计对象是�
 
 这套项目包含三个层次。
 
-**技能入口**告诉Agent何时查阅Web平台知识；**CLI**负责搜索与检索；**指南**提供实现模式、平台限制、兼容状态和回退策略。[1]
+**技能入口**定义Web平台知识的查阅场景；**CLI**负责搜索与检索；**指南**提供实现模式、平台限制、兼容状态和回退策略。[1]
 
 一个弹窗任务的典型过程是：Agent提炼能力需求，搜索相关指南，读取内容，编写代码，核对实现与指南。
 
@@ -53,7 +53,7 @@ Modern Web Guidance 1.0提供`legacy-scan`。扫描对象包含HTML、CSS、Java
 
 **检测命中提供的是候选线索，代码上下文决定改造范围。**
 
-官方工作流包含四步：扫描、情境验证、报告计划、指南检索与重构验证。工具的扫描接口负责发现问题，跨HTML、CSS与JavaScript的修改由Agent完成。官方说明给出的设计选择是：`legacy-scan`缺少`--fix`接口。[3]
+官方工作流包含四步：扫描、情境验证、报告计划、指南检索与重构验证。工具的扫描接口负责发现问题，Agent完成跨HTML、CSS与JavaScript的修改。官方说明给出的设计选择是：`legacy-scan`缺少`--fix`接口。[3]
 
 ![Modern Web Guidance的检索与代码现代化工作流](/article-images/google-modern-web-guidance-agent-skills/workflow.webp)
 
